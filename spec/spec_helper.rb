@@ -2,7 +2,7 @@ require 'simplecov'
 SimpleCov.start
 
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
-require 'carthage_cache'
+require 'carthage_cache_res'
 require_relative './mocks/mock_terminal'
 require_relative './mocks/mock_command_executor'
 require_relative './mocks/mock_swift_version_resolver'

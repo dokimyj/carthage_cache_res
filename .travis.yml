@@ -2,9 +2,9 @@ os:
   - osx
 language: ruby
 cache: bundler
-osx_image: xcode9
+osx_image: xcode11
 rvm:
-  - 2.4.2
+  - 2.6.2
 
 branches:
   only:

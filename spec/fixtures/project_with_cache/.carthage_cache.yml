@@ -1,5 +1,5 @@
 ---
-:bucket_name: carthage-cache
+:bucket_name: carthage-cache-res
 :aws_s3_client_options:
   :region: us-west-2
   :access_key_id: AAAAAAAAAAAAAAA

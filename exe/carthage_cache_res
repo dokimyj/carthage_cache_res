@@ -1,0 +1,107 @@
+#!/usr/bin/env ruby
+
+if Gem::Specification::find_all_by_name('bundler').any?
+  require 'bundler/setup'
+else
+  require 'rubygems'
+  gem 'carthage_cache_res'
+end
+
+require "commander/import"
+require "carthage_cache_res"
+
+PROGRAM_NAME = 'carthage_cache_res'
+
+program :name, PROGRAM_NAME
+program :version, CarthageCacheRes::VERSION
+program :description, CarthageCacheRes::DESCRIPTION
+
+config = {}
+verbose = false
+global_option('-b', '--bucket-name BUCKET_NAME', 'Set Amazon S3 bucket to be used to store cache archives') do |bucket_name|
+  config[:bucket_name] = bucket_name
+end
+global_option('--verbose') { verbose = true }
+
+command :exist do |c|
+  c.syntax = "#{PROGRAM_NAME} exist [PROJECT_PATH]"
+  c.description = 'Checks if a cache archive exists for the current Cartfile.resolved.'
+  c.option '-s', '--script', 'Makes prgram write "true" or "false" to STDOUT instead of more verbose message.'
+  c.action do |args, options|
+    app = CarthageCacheRes::Application.new(args.first || ".", verbose, config)
+    if app.archive_exist?
+      if options.script
+        puts "true"
+      else
+        puts "There is a cached archive for the current Cartfile.resolved file."
+      end
+    else
+      if options.script
+        puts "false"
+      else
+        puts "No cached archive available for the current Cartfile.resolved file."
+        puts "You should probably run 'carthage bootstrap'."
+      end
+    end
+  end
+end
+
+command :install do |c|
+  c.syntax = "#{PROGRAM_NAME} install [PROJECT_PATH]"
+  c.description = 'Installs the cache archive for the current Cartfile.resolved.'
+  c.action do |args, options|
+    app = CarthageCacheRes::Application.new(args.first || ".", verbose, config)
+    exit 1 unless app.install_archive
+  end
+end
+
+command :publish do |c|
+  c.syntax = "#{PROGRAM_NAME} publish [PROJECT_PATH]"
+  c.description = 'Generates and uploads the cache archive for the current Cartfile.resolved.'
+  c.option '-f', '--force', 'Forces to create a new archive even if an archive already exist.'
+  c.option '-p', '--prune-build-directory', 'Removes unused frameworks from build directory.'
+  c.option '-w', '--prune-white-list PRUNE_WHITE_LIST', String, 'Path to a YAML file containing the prune white list.'
+  c.option '-x', '--platforms PLATFORMS', String, 'A comma separated list of platforms that should be archived. Platforms not present in this list won\'t be archived'
+  c.action do |args, options|
+    options.default force: false
+    app = CarthageCacheRes::Application.new(args.first || ".", verbose, config)
+    platforms = options.platforms.split(",") if options.platforms
+    if platforms && platforms.empty?
+      puts "If you pass -x or --platforms option the you must specify at least one platform."
+      exit 1
+    end
+    app.create_archive(options.force, options.prune_build_directory, options.prune_white_list, platforms)
+  end
+end
+
+command :config do |c|
+  c.syntax = "#{PROGRAM_NAME} config [PROJECT_PATH]"
+  c.description = "Generates a '#{CarthageCacheRes::Configurator::CONFIG_FILE_NAME}' config file."
+  c.action do |args, options|
+    terminal = CarthageCacheRes::Terminal.new(verbose)
+    configurator = CarthageCacheRes::Configurator.new(terminal, args.first || ".")
+    wizard = CarthageCacheRes::ConfiguratorWizard.new(method(:ask), method(:password))
+    config = wizard.start
+    configurator.save_config(config)
+  end
+end
+
+command :prune do |c|
+  c.syntax = "#{PROGRAM_NAME} prune [PROJECT_PATH]"
+  c.description = 'Removes unused frameworks from build directory.'
+  c.option '-w', '--prune-white-list PRUNE_WHITE_LIST', String, 'Path to a YAML file containing the prune white list.'
+  c.action do |args, options|
+    options.default force: false, prune: false
+    app = CarthageCacheRes::Application.new(args.first || ".", verbose, config)
+    app.prune_build_directory(options.prune_white_list)
+  end
+end
+
+command :validate do |c|
+  c.syntax = "#{PROGRAM_NAME} validate [PROJECT_PATH]"
+  c.description = 'Validates the cache archive for the current Cartfile.resolved.'
+  c.action do |args, options|
+    app = CarthageCacheRes::Application.new(args.first || ".", verbose, config)
+    exit 1 unless app.validate_installation
+  end
+end
