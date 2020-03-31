@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
     CarthageCache generate a hash key based on the content of your Cartfile.resolved and checks
     if there is a cache archive (a zip file of your Carthage/Build directory) associated to that hash.
     If there is one it will download it and install it in your project avoiding the need to run carthage bootstrap.
-    -------Thanks Mr.Blas but now we are facing dependency conflict with Fastlane 2.144--------
+    ----------------------Thanks Mr.Blas but now we are facing dependency conflict with Fastlane 2.144--------------------
     What I want to solve: Dependency conflict with Fastlane 2.144
     What I did: 
       1. Changed name of this gem to "carthage_cache_res"
@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 1.10"
+  spec.add_development_dependency "bundler", "~> 2.0"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec"
   spec.add_development_dependency "pry"
