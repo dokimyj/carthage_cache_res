@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
     What I want to solve: Dependency conflict with Fastlane 2.144
     What I did: 
       1. Changed name of this gem to "carthage_cache_res"
-      2. Fixed runtime dependencies: aws-sdk > 3.0, commander = 4.3.8
+      2. Fixed runtime dependencies: aws-sdk < 3, commander = 4.3.8
       3. Changed system dependency versions: ruby > 2.6, xcode 11.x
   }
   spec.homepage      = "https://github.com/dokim/carthage_cache_res"
@@ -38,6 +38,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "codeclimate-test-reporter", "~> 1.0.0"
   spec.add_development_dependency "rspec_junit_formatter", "~> 0.2.3"
 
-  spec.add_dependency "aws-sdk", "~> 2"
+  spec.add_dependency "aws-sdk", "~> 3"
   spec.add_dependency "commander", "=4.3.8"
 end
